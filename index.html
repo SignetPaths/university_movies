@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+                background: #000;
+            }
+            video {
+                width: 100vw;
+                height: 100vh;
+                object-fit: cover;
+                display: none;
+            }
+            video.active {
+                display: block;
+            }
+        </style>
+    </head>
+    <body>
+        <video class="active" src="video1.MP4" autoplay playsinline></video>
+        <video src="video2.MP4" playsinline></video>
+        <video src="video3.mov" playsinline></video>
+        <video src="video4.MP4" playsinline></video>
+        <video src="video5.MP4" playsinline></video>
+        <video src="video6.MP4" playsinline></video>
+        <video src="video7.MP4" playsinline></video>
+        <video src="video8.MP4" playsinline></video>
+        <video src="video9.MP4" playsinline></video>
+        <script>
+            const videos = Array.from(document.querySelectorAll("video"));
+            let current = 0;
+            function show(i) {
+                videos.forEach((v, idx) => {
+                    v.classList.toggle("active", idx === i);
+                    if (idx !== i) {
+                        v.pause();
+                        v.currentTime = 0;
+                    }
+                });
+                videos[i].play();
+            }
+            videos.forEach((v, idx) => {
+                v.addEventListener("ended", () => {
+                    current = (idx + 1) % videos.length;
+                    show(current);
+                });
+            });
+
+            // woosh back on press
+            let rewindTimer = null;
+            function startRewind() {
+                const v = videos[current];
+                v.pause();
+                if (rewindTimer) clearInterval(rewindTimer);
+                rewindTimer = setInterval(() => {
+                    v.currentTime = Math.max(0, v.currentTime - 0.06); // ~3.6s/sec back at 60fps
+                }, 16);
+            }
+            function stopRewind() {
+                if (rewindTimer) {
+                    clearInterval(rewindTimer);
+                    rewindTimer = null;
+                }
+                videos[current].play();
+            }
+
+            document.addEventListener("mousedown", startRewind);
+            document.addEventListener("mouseup", stopRewind);
+            document.addEventListener("touchstart", startRewind, {
+                passive: true,
+            });
+            document.addEventListener("touchend", stopRewind);
+        </script>
+    </body>
+</html>
